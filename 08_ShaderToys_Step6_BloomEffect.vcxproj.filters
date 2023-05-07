@@ -39,6 +39,9 @@
     <ClCompile Include="BasicMeshGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SunMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExampleApp.h">
@@ -83,6 +86,9 @@
     <ClInclude Include="ImageFilter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SunMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />
@@ -108,5 +114,6 @@
     <FxCompile Include="BlurXPixelShader.hlsl" />
     <FxCompile Include="BlurYPixelShader.hlsl" />
     <FxCompile Include="CombinePixelShader.hlsl" />
+    <FxCompile Include="StarPixelShader.hlsl" />
   </ItemGroup>
 </Project>

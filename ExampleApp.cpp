@@ -19,8 +19,8 @@ bool ExampleApp::Initialize() {
         return false;
 
     m_cubeMapping.Initialize(m_device,
-                             L"./CubemapTextures/Stonewall_diffuseIBL.dds",
-                             L"./CubemapTextures/Stonewall_specularIBL.dds");
+                             L"./CubemapTextures/Ice.dds",
+                             L"./CubemapTextures/Ice.dds");
 
     MeshData sphere = GeometryGenerator::MakeSphere(0.3f, 100, 100);
     sphere.textureFilename = "ojwD8.jpg";
@@ -31,6 +31,11 @@ bool ExampleApp::Initialize() {
     m_meshGroupCharacter.Initialize(m_device, "C:/Users/DaerimHan/Desktop/d3d11/Zelda/", "zeldaPosed001.fbx");
     m_meshGroupCharacter.m_diffuseResView = m_cubeMapping.m_diffuseResView;
     m_meshGroupCharacter.m_specularResView = m_cubeMapping.m_specularResView;
+
+     MeshData sun = GeometryGenerator::MakeBox(.1f);
+    sun.textureFilename = "shadertoytexture0.jpg";
+     m_meshGroupBox.Initialize(m_device, {sun}, L"BasicVertexShader.hlsl",
+        L"StarPixelShader.hlsl"); // "StarPixelShader.hlsl"
 
     BuildFilters();
 
@@ -80,7 +85,19 @@ void ExampleApp::Update(float dt) {
                 m_lightFromGUI;
         }
     }
+    {
+        m_meshGroupBox.m_basicVertexConstantData.model = modelRow.Transpose();
+        m_meshGroupBox.m_basicVertexConstantData.view = viewRow.Transpose();
+        m_meshGroupBox.m_basicVertexConstantData.projection =
+            projRow.Transpose();
+        visibleMeshGroup.m_basicPixelConstantData.eyeWorld = eyeWorld;
 
+        visibleMeshGroup.m_basicPixelConstantData.material.diffuse =
+            Vector3(m_materialDiffuse);
+        visibleMeshGroup.m_basicPixelConstantData.material.specular =
+            Vector3(m_materialSpecular);
+        m_meshGroupBox.UpdateConstantBuffers(m_device, m_context);
+    }
     visibleMeshGroup.m_basicVertexConstantData.model = modelRow.Transpose();
     visibleMeshGroup.m_basicVertexConstantData.view = viewRow.Transpose();
     visibleMeshGroup.m_basicVertexConstantData.projection = projRow.Transpose();
@@ -134,17 +151,24 @@ void ExampleApp::Render() {
     } else {
         m_context->RSSetState(m_rasterizerSate.Get());
     }
-
+    // 태양 매핑
+    m_meshGroupBox.Render(m_context);
     // 큐브매핑
     m_cubeMapping.Render(m_context);
 
     // 물체들
-    if (m_visibleMeshIndex == 0) {
-        m_meshGroupSphere.Render(m_context);
-    } else {
-        m_meshGroupCharacter.Render(m_context);
-    }
+    //if (m_visibleMeshIndex == 0) {
+    //    m_meshGroupSphere.Render(m_context);
+    //} else {
+    //    m_meshGroupCharacter.Render(m_context);
+    //}
+    
 
+    // 후처리 필터 시작하기 전에 Texture2DMS에 렌더링 된 결과를 Texture2D로 복사
+    ComPtr<ID3D11Texture2D> backBuffer;
+    m_swapChain->GetBuffer(0, IID_PPV_ARGS(backBuffer.GetAddressOf()));
+    m_context->ResolveSubresource(m_tempTexture.Get(), 0, backBuffer.Get(), 0,
+                                  DXGI_FORMAT_R8G8B8A8_UNORM);
     // 후처리 필터
     for (auto &f : m_filters) {
         f->Render(m_context);

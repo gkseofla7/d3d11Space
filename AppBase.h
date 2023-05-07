@@ -61,6 +61,8 @@ class AppBase {
     ComPtr<ID3D11RenderTargetView> m_renderTargetView;
     ComPtr<ID3D11ShaderResourceView> m_shaderResourceView;
     ComPtr<IDXGISwapChain> m_swapChain;
+    // 렌더타겟의 Texture2DMS를 복사할 임시 텍스춰
+    ComPtr<ID3D11Texture2D> m_tempTexture;
 
     ComPtr<ID3D11RasterizerState> m_rasterizerSate;
     ComPtr<ID3D11RasterizerState> m_wireRasterizerSate;

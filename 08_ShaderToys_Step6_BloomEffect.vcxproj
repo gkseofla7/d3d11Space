@@ -140,6 +140,7 @@
     <ClCompile Include="AppBase.cpp" />
     <ClCompile Include="BasicMeshGroup.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
+    <ClCompile Include="SunMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicConstantData.h" />
@@ -155,6 +156,7 @@
     <ClInclude Include="MeshData.h" />
     <ClInclude Include="BasicMeshGroup.h" />
     <ClInclude Include="ModelLoader.h" />
+    <ClInclude Include="SunMesh.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
@@ -226,6 +228,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="StarPixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>
   </ItemGroup>

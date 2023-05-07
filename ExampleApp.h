@@ -29,6 +29,7 @@ class ExampleApp : public AppBase {
   protected:
     BasicMeshGroup m_meshGroupSphere;
     BasicMeshGroup m_meshGroupCharacter;
+    BasicMeshGroup m_meshGroupBox;
     CubeMapping m_cubeMapping;
 
     bool m_usePerspectiveProjection = true;

@@ -9,11 +9,18 @@ void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device,
 
     auto meshes = GeometryGenerator::ReadFromFile(basePath, filename);
 
-    Initialize(device, meshes);
+    Initialize(device, meshes, L"BasicVertexShader.hlsl",
+               L"BasicPixelShader.hlsl");
 }
-
 void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device,
-                           const std::vector<MeshData> &meshes) {
+    const std::vector<MeshData>& meshes) {
+    Initialize(device, meshes, L"BasicVertexShader.hlsl",
+               L"BasicPixelShader.hlsl");
+}
+void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device,
+                                const std::vector<MeshData> &meshes,
+                                const std::wstring &vsPath,
+                                const std::wstring &psPath) {
 
     // Sampler 만들기
     D3D11_SAMPLER_DESC sampDesc;
@@ -69,10 +76,10 @@ void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device,
     };
 
     D3D11Utils::CreateVertexShaderAndInputLayout(
-        device, L"BasicVertexShader.hlsl", basicInputElements,
+        device, vsPath, basicInputElements,
         m_basicVertexShader, m_basicInputLayout);
 
-    D3D11Utils::CreatePixelShader(device, L"BasicPixelShader.hlsl",
+    D3D11Utils::CreatePixelShader(device, psPath,
                                   m_basicPixelShader);
 
     // 노멀 벡터 그리기

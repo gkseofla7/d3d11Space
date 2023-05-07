@@ -309,7 +309,7 @@ bool AppBase::InitDirect3D() {
         cout << "MSAA not supported." << endl;
     }
 
-    // numQualityLevels = 0; // MSAA 강제로 끄기
+    numQualityLevels = 0; // MSAA 강제로 끄기
 
     if (FAILED(device.As(&m_device))) {
         cout << "device.AS() failed." << endl;
@@ -487,7 +487,26 @@ bool AppBase::CreateRenderTargetView() {
     if (backBuffer) {
         m_device->CreateRenderTargetView(backBuffer.Get(), nullptr,
                                          m_renderTargetView.GetAddressOf());
-        m_device->CreateShaderResourceView(backBuffer.Get(), nullptr,
+
+        // m_device->CreateShaderResourceView(backBuffer.Get(), nullptr,
+        // m_shaderResourceView.GetAddressOf());
+
+        D3D11_TEXTURE2D_DESC desc;
+        backBuffer->GetDesc(&desc);
+        // 디버깅용
+        // cout << desc.Width << " " << desc.Height << " " << desc.Format <<
+        // endl;
+        desc.SampleDesc.Count = 1;
+        desc.SampleDesc.Quality = 0;
+        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        desc.MiscFlags = 0;
+
+        if (FAILED(m_device->CreateTexture2D(&desc, nullptr,
+                                             m_tempTexture.GetAddressOf()))) {
+            cout << "Failed()" << endl;
+        }
+        // ShaderResource를 (backBuffer가 아니라) tempTexture로부터 생성
+        m_device->CreateShaderResourceView(m_tempTexture.Get(), nullptr,
                                            m_shaderResourceView.GetAddressOf());
     } else {
         std::cout << "CreateRenderTargetView() failed." << std::endl;

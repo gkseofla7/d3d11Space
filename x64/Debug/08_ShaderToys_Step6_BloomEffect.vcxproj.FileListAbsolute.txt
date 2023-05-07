@@ -3,3 +3,8 @@ C:\Users\DaerimHan\Downloads\HongLabGraphicsPart2_5_8v4-230214-120635\08_ShaderT
 C:\Users\DaerimHan\Downloads\HongLabGraphicsPart2_5_8v4-230214-120635\08_ShaderToys_Step6_BloomEffect\x64\Debug\assimp-vc143-mtd.dll
 C:\Users\DaerimHan\Downloads\HongLabGraphicsPart2_5_8v4-230214-120635\08_ShaderToys_Step6_BloomEffect\x64\Debug\zlibd1.dll
 C:\Users\DaerimHan\Downloads\HongLabGraphicsPart2_5_8v4-230214-120635\08_ShaderToys_Step6_BloomEffect\x64\Debug\pugixml.dll
+C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\08_ShaderToys_Step6_BloomEffect.exe
+C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\08_ShaderToys_Step6_BloomEffect.vcxproj.CopyComplete
+C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\assimp-vc143-mtd.dll
+C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\zlibd1.dll
+C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\pugixml.dll

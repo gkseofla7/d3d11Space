@@ -9,11 +9,14 @@ namespace hlab {
 
 class BasicMeshGroup {
   public:
+    void Initialize(ComPtr<ID3D11Device> &device,
+                    const std::vector<MeshData> &meshes);
     void Initialize(ComPtr<ID3D11Device> &device, const std::string &basePath,
                     const std::string &filename);
 
     void Initialize(ComPtr<ID3D11Device> &device,
-                    const std::vector<MeshData> &meshes);
+               const std::vector<MeshData> &meshes, const std::wstring &vsPath,
+               const std::wstring &psPath);
 
     void UpdateConstantBuffers(ComPtr<ID3D11Device> &device,
                                ComPtr<ID3D11DeviceContext> &context);
