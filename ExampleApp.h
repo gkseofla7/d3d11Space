@@ -10,6 +10,7 @@
 #include "Light.h"
 #include "BasicMeshGroup.h"
 #include "ImageFilter.h"
+#include "SunMesh.h"
 
 namespace hlab {
 
@@ -29,7 +30,8 @@ class ExampleApp : public AppBase {
   protected:
     BasicMeshGroup m_meshGroupSphere;
     BasicMeshGroup m_meshGroupCharacter;
-    BasicMeshGroup m_meshGroupBox;
+
+    SunMesh m_meshSun;
     CubeMapping m_cubeMapping;
 
     bool m_usePerspectiveProjection = true;

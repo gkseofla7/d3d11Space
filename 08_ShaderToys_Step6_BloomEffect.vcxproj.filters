@@ -115,5 +115,6 @@
     <FxCompile Include="BlurYPixelShader.hlsl" />
     <FxCompile Include="CombinePixelShader.hlsl" />
     <FxCompile Include="StarPixelShader.hlsl" />
+    <FxCompile Include="StartVertexShader.hlsl" />
   </ItemGroup>
 </Project>

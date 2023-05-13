@@ -1,7 +1,7 @@
 #include "SunMesh.h"
 namespace hlab {
 void SunMesh::Initialize(ComPtr<ID3D11Device> &device,
-                         const std::vector<MeshData> &meshes) {
+                         const MeshData &meshData) {
 
     // Sampler 만들기
     D3D11_SAMPLER_DESC sampDesc;
@@ -25,27 +25,26 @@ void SunMesh::Initialize(ComPtr<ID3D11Device> &device,
     D3D11Utils::CreateConstantBuffer(device, m_basicPixelConstantData,
                                      m_pixelConstantBuffer);
 
-    for (const auto &meshData : meshes) {
-        auto newMesh = std::make_shared<Mesh>();
-        D3D11Utils::CreateVertexBuffer(device, meshData.vertices,
-                                       newMesh->vertexBuffer);
-        newMesh->m_indexCount = UINT(meshData.indices.size());
-        D3D11Utils::CreateIndexBuffer(device, meshData.indices,
-                                      newMesh->indexBuffer);
+    auto newMesh = std::make_shared<Mesh>();
+    D3D11Utils::CreateVertexBuffer(device, meshData.vertices,
+                                   newMesh->vertexBuffer);
+    newMesh->m_indexCount = UINT(meshData.indices.size());
+    D3D11Utils::CreateIndexBuffer(device, meshData.indices,
+                                  newMesh->indexBuffer);
 
-        if (!meshData.textureFilename.empty()) {
+    if (!meshData.textureFilename.empty()) {
 
-            std::cout << meshData.textureFilename << std::endl;
-            D3D11Utils::CreateTexture(device, meshData.textureFilename,
-                                      newMesh->texture,
-                                      newMesh->textureResourceView);
-        }
-
-        newMesh->vertexConstantBuffer = m_vertexConstantBuffer;
-        newMesh->pixelConstantBuffer = m_pixelConstantBuffer;
-
-        this->m_meshes.push_back(newMesh);
+        std::cout << meshData.textureFilename << std::endl;
+        D3D11Utils::CreateTexture(device, meshData.textureFilename,
+                                  newMesh->texture,
+                                  newMesh->textureResourceView);
     }
+
+    newMesh->vertexConstantBuffer = m_vertexConstantBuffer;
+    newMesh->pixelConstantBuffer = m_pixelConstantBuffer;
+
+    this->m_meshes.push_back(newMesh);
+    
 
     vector<D3D11_INPUT_ELEMENT_DESC> basicInputElements = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
@@ -55,52 +54,57 @@ void SunMesh::Initialize(ComPtr<ID3D11Device> &device,
         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 4 * 3 + 4 * 3,
          D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
-
+        
     D3D11Utils::CreateVertexShaderAndInputLayout(
-        device, vsPath, basicInputElements, m_basicVertexShader,
+          device, L"StartVertexShader.hlsl", basicInputElements,
+          m_basicVertexShader,
         m_basicInputLayout);
 
-    D3D11Utils::CreatePixelShader(device, psPath, m_basicPixelShader);
+    D3D11Utils::CreatePixelShader(device, L"StarPixelShader.hlsl",
+                                  m_basicPixelShader);
+}
 
-    // 노멀 벡터 그리기
-    m_normalLines = std::make_shared<Mesh>();
 
-    std::vector<Vertex> normalVertices;
-    std::vector<uint32_t> normalIndices;
+void SunMesh::UpdateConstantBuffers(ComPtr<ID3D11Device> &device,
+    ComPtr<ID3D11DeviceContext>& context){
 
-    // 여러 메쉬의 normal 들을 하나로 합치기
-    size_t offset = 0;
-    for (const auto &meshData : meshes) {
-        for (size_t i = 0; i < meshData.vertices.size(); i++) {
+    D3D11Utils::UpdateBuffer(device, context, m_basicVertexConstantData,
+                             m_vertexConstantBuffer);
 
-            auto v = meshData.vertices[i];
+    D3D11Utils::UpdateBuffer(device, context, m_basicPixelConstantData,
+                             m_pixelConstantBuffer);
 
-            v.texcoord.x = 0.0f; // 시작점 표시
-            normalVertices.push_back(v);
 
-            v.texcoord.x = 1.0f; // 끝점 표시
-            normalVertices.push_back(v);
+ }
+void SunMesh::Render(ComPtr<ID3D11DeviceContext> &context) {
 
-            normalIndices.push_back(uint32_t(2 * (i + offset)));
-            normalIndices.push_back(uint32_t(2 * (i + offset) + 1));
-        }
-        offset += meshData.vertices.size();
+    context->VSSetShader(m_basicVertexShader.Get(), 0, 0);
+    context->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
+    context->PSSetShader(m_basicPixelShader.Get(), 0, 0);
+
+    UINT stride = sizeof(Vertex);
+    UINT offset = 0;
+    for (const auto &mesh : m_meshes) {
+
+        context->VSSetConstantBuffers(
+            0, 1, mesh->vertexConstantBuffer.GetAddressOf());
+
+        // 물체 렌더링할 때 큐브맵도 같이 사용
+        ID3D11ShaderResourceView *resViews[1] = {
+            mesh->textureResourceView.Get()};
+        context->PSSetShaderResources(0, 1, resViews);
+
+        context->PSSetConstantBuffers(0, 1,
+                                      mesh->pixelConstantBuffer.GetAddressOf());
+
+        context->IASetInputLayout(m_basicInputLayout.Get());
+        context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(),
+                                    &stride, &offset);
+        context->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT,
+                                  0);
+        context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        context->DrawIndexed(mesh->m_indexCount, 0, 0);
     }
-
-    D3D11Utils::CreateVertexBuffer(device, normalVertices,
-                                   m_normalLines->vertexBuffer);
-    m_normalLines->m_indexCount = UINT(normalIndices.size());
-    D3D11Utils::CreateIndexBuffer(device, normalIndices,
-                                  m_normalLines->indexBuffer);
-
-    D3D11Utils::CreateVertexShaderAndInputLayout(
-        device, L"NormalVertexShader.hlsl", basicInputElements,
-        m_normalVertexShader, m_basicInputLayout);
-    D3D11Utils::CreatePixelShader(device, L"NormalPixelShader.hlsl",
-                                  m_normalPixelShader);
-
-    D3D11Utils::CreateConstantBuffer(device, m_normalVertexConstantData,
-                                     m_normalVertexConstantBuffer);
 }
 
 } // namespace hlab

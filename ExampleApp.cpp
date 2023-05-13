@@ -32,11 +32,10 @@ bool ExampleApp::Initialize() {
     m_meshGroupCharacter.m_diffuseResView = m_cubeMapping.m_diffuseResView;
     m_meshGroupCharacter.m_specularResView = m_cubeMapping.m_specularResView;
 
-     MeshData sun = GeometryGenerator::MakeBox(.1f);
+     MeshData sun = GeometryGenerator::MakeSphere(0.3f, 100, 100);
     sun.textureFilename = "shadertoytexture0.jpg";
-     m_meshGroupBox.Initialize(m_device, {sun}, L"BasicVertexShader.hlsl",
-        L"StarPixelShader.hlsl"); // "StarPixelShader.hlsl"
-
+     m_meshSun.Initialize(m_device, {sun}); // "StarPixelShader.hlsl"
+    m_meshSun.m_radius = 0.3f;
     BuildFilters();
 
     return true;
@@ -54,7 +53,7 @@ void ExampleApp::Update(float dt) {
                     Matrix::CreateRotationX(m_modelRotation.x) *
                     Matrix::CreateRotationZ(m_modelRotation.z) *
                     Matrix::CreateTranslation(m_modelTranslation);
-
+    
     auto invTransposeRow = modelRow;
     invTransposeRow.Translation(Vector3(0.0f));
     invTransposeRow = invTransposeRow.Invert().Transpose();
@@ -70,46 +69,52 @@ void ExampleApp::Update(float dt) {
                                        aspect, m_nearZ, m_farZ)
             : XMMatrixOrthographicOffCenterLH(-aspect, aspect, -1.0f, 1.0f,
                                               m_nearZ, m_farZ);
-
+    m_meshSun.m_basicVertexConstantData.model = modelRow.Transpose();
+    m_meshSun.m_basicVertexConstantData.view = viewRow.Transpose();
+    m_meshSun.m_basicVertexConstantData.projection = projRow.Transpose();
     auto eyeWorld = Vector3::Transform(Vector3(0.0f), viewRow.Invert());
 
-    // MeshGroup의 ConstantBuffers 업데이트
-
-    for (int i = 0; i < MAX_LIGHTS; i++) {
-        // 다른 조명 끄기
-        if (i != m_lightType) {
-            visibleMeshGroup.m_basicPixelConstantData.lights[i].strength *=
-                0.0f;
-        } else {
-            visibleMeshGroup.m_basicPixelConstantData.lights[i] =
-                m_lightFromGUI;
-        }
-    }
+    Vector3 centerWorldPos = Vector3::Transform(m_meshSun.m_center, modelRow);
+    Matrix projSun = Matrix::CreateLookAt(centerWorldPos, eyeWorld, Vector3(0.f, 1.f, 0.f));
+    m_meshSun.m_basicPixelConstantData.sunViewMatrix = projSun.Transpose();
+    m_meshSun.m_basicPixelConstantData.radius = m_meshSun.m_radius;
     {
-        m_meshGroupBox.m_basicVertexConstantData.model = modelRow.Transpose();
-        m_meshGroupBox.m_basicVertexConstantData.view = viewRow.Transpose();
-        m_meshGroupBox.m_basicVertexConstantData.projection =
+        
+
+        // MeshGroup의 ConstantBuffers 업데이트
+
+        for (int i = 0; i < MAX_LIGHTS; i++) {
+            // 다른 조명 끄기
+            if (i != m_lightType) {
+                visibleMeshGroup.m_basicPixelConstantData.lights[i].strength *=
+                    0.0f;
+            } else {
+                visibleMeshGroup.m_basicPixelConstantData.lights[i] =
+                    m_lightFromGUI;
+            }
+        }
+        {
+
+            visibleMeshGroup.m_basicPixelConstantData.eyeWorld = eyeWorld;
+
+            visibleMeshGroup.m_basicPixelConstantData.material.diffuse =
+                Vector3(m_materialDiffuse);
+            visibleMeshGroup.m_basicPixelConstantData.material.specular =
+                Vector3(m_materialSpecular);
+        }
+        visibleMeshGroup.m_basicVertexConstantData.model = modelRow.Transpose();
+        visibleMeshGroup.m_basicVertexConstantData.view = viewRow.Transpose();
+        visibleMeshGroup.m_basicVertexConstantData.projection =
             projRow.Transpose();
+
         visibleMeshGroup.m_basicPixelConstantData.eyeWorld = eyeWorld;
 
         visibleMeshGroup.m_basicPixelConstantData.material.diffuse =
             Vector3(m_materialDiffuse);
         visibleMeshGroup.m_basicPixelConstantData.material.specular =
             Vector3(m_materialSpecular);
-        m_meshGroupBox.UpdateConstantBuffers(m_device, m_context);
+        visibleMeshGroup.UpdateConstantBuffers(m_device, m_context);
     }
-    visibleMeshGroup.m_basicVertexConstantData.model = modelRow.Transpose();
-    visibleMeshGroup.m_basicVertexConstantData.view = viewRow.Transpose();
-    visibleMeshGroup.m_basicVertexConstantData.projection = projRow.Transpose();
-
-    visibleMeshGroup.m_basicPixelConstantData.eyeWorld = eyeWorld;
-
-    visibleMeshGroup.m_basicPixelConstantData.material.diffuse =
-        Vector3(m_materialDiffuse);
-    visibleMeshGroup.m_basicPixelConstantData.material.specular =
-        Vector3(m_materialSpecular);
-    visibleMeshGroup.UpdateConstantBuffers(m_device, m_context);
-
     // 큐브 매핑 Constant Buffer 업데이트
     m_cubeMapping.UpdateConstantBuffers(m_device, m_context,
                                         (Matrix::CreateRotationY(m_viewRot.y) *
@@ -151,8 +156,6 @@ void ExampleApp::Render() {
     } else {
         m_context->RSSetState(m_rasterizerSate.Get());
     }
-    // 태양 매핑
-    m_meshGroupBox.Render(m_context);
     // 큐브매핑
     m_cubeMapping.Render(m_context);
 

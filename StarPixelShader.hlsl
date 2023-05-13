@@ -5,16 +5,15 @@ SamplerState g_sampler : register(s0);
 
 cbuffer SamplingPixelConstantData : register(b0)
 {
+    Matrix sunViewMatrix;
+    float radius;
     float dx;
     float dy;
     float threshold;
     float strength;
     float iTime;
-    float dummy[3];
+    float dummy[2];
 };
-
-
-
 
 
 // based on https://www.shadertoy.com/view/lsf3RH by
@@ -45,10 +44,39 @@ float snoise(float3 uv, float res)	// by trisomie21
     return lerp(r0, r1, f.z) * 2. - 1.;
 }
 
+//float3 projectionToPlane(float3 pos)
+//{
+   // float4 planeNormal = normalize(pos - eyeWorld);
+    //float a = planeNormal.x;
+    //float b = planeNormal.y;
+    //float c = planeNormal.z;
+    //float d = -(a * center.x + b * center.y + c * center.z);
+    
+   // float x0 = pos.x;
+    //float y0 = pos.y;
+    //float z0 = pos.z;
+    
+   // float t = -(a * x0 + b * y0 + c * z0 + d) / (a * a + b * b + c * c);
+    
+   // float x = x0 + a * t;
+    //float y = y0 + b * t;
+    //float z = z0 * c * t;
+    //return float3(x, y, z);
+
+//}
+
 static float freqs[4];
 
 float4 main(PixelShaderInput input) : SV_TARGET
-{
+{  
+    float4 worldPos = float4(input.posWorld, 1.0f);
+    worldPos = mul(worldPos, sunViewMatrix).xyzw;
+    worldPos = worldPos / radius;
+    //z√‡ ∞™¿Ã 0..?
+    input.texcoord.x = (worldPos.x + 1.0) / 2.;
+    input.texcoord.y = (2 - (worldPos.y + 1.0)) / 2.;
+    
+    
     freqs[0] = g_texture0.Sample(g_sampler, float2(0.01, 0.25)).x;
     freqs[1] = g_texture0.Sample(g_sampler, float2(0.07, 0.25)).x;
     freqs[2] = g_texture0.Sample(g_sampler, float2(0.15, 0.25)).x;

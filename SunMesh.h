@@ -7,7 +7,7 @@ namespace hlab {
 class SunMesh {
   public:
     void Initialize(ComPtr<ID3D11Device> &device,
-                    const std::vector<MeshData> &meshes);
+                    const MeshData &meshes);
 
     void UpdateConstantBuffers(ComPtr<ID3D11Device> &device,
                                ComPtr<ID3D11DeviceContext> &context);
@@ -16,6 +16,8 @@ class SunMesh {
 
     BasicVertexConstantData m_basicVertexConstantData;
     SunPixelConstantData m_basicPixelConstantData;
+    float m_radius = 0.f;
+    Vector3 m_center = Vector3(0.f,0.f,0.f);
   private:
     // 메쉬 그리기
     std::vector<shared_ptr<Mesh>> m_meshes;

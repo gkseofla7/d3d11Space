@@ -42,6 +42,9 @@
     <ContentFile>
       <FullPath>C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\StarPixelShader.cso</FullPath>
     </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\StartVertexShader.cso</FullPath>
+    </ContentFile>
   </ContentFiles>
   <SatelliteDlls />
   <NonRecipeFileRefs />

@@ -1,22 +1,2 @@
-﻿  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\BasicPixelShader.cso
-  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\BasicVertexShader.cso
-  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\BlurYPixelShader.cso
-  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\CombinePixelShader.cso
-  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\CubeMappingPixelShader.cso
-  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\CubeMappingVertexShader.cso
-  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\BlurXPixelShader.cso
-  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\NormalPixelShader.cso
-  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\NormalVertexShader.cso
-  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\SamplingPixelShader.cso
-  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\SamplingVertexShader.cso
-  compilation object save succeeded; see C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\StarPixelShader.cso
-  CubeMapping.cpp
-  D3D11Utils.cpp
-  ExampleApp.cpp
-  GeometryGenerator.cpp
-  main.cpp
-  AppBase.cpp
-  BasicMeshGroup.cpp
-  ModelLoader.cpp
-  코드를 생성하고 있습니다...
+﻿  ExampleApp.cpp
   08_ShaderToys_Step6_BloomEffect.vcxproj -> C:\Users\DaerimHan\Desktop\d3d11Space\d3d11Space\x64\Debug\08_ShaderToys_Step6_BloomEffect.exe
