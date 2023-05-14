@@ -18,6 +18,10 @@ class SunMesh {
     SunPixelConstantData m_basicPixelConstantData;
     float m_radius = 0.f;
     Vector3 m_center = Vector3(0.f,0.f,0.f);
+
+    // ExampleApp:Initialize()에서 접근
+    ComPtr<ID3D11ShaderResourceView> m_diffuseResView;
+    ComPtr<ID3D11ShaderResourceView> m_specularResView;
   private:
     // 메쉬 그리기
     std::vector<shared_ptr<Mesh>> m_meshes;

@@ -1,12 +1,14 @@
 #include "Common.hlsli" // 쉐이더에서도 include 사용 가능
 Texture2D g_texture0 : register(t0);
+TextureCube g_specularCube : register(t1);
 SamplerState g_sampler : register(s0);
 
 
 cbuffer SamplingPixelConstantData : register(b0)
 {
     Matrix sunViewMatrix;
-    float radius;
+    float3 eyeWorld;
+    float sphereRadius;
     float dx;
     float dy;
     float threshold;
@@ -69,12 +71,15 @@ static float freqs[4];
 
 float4 main(PixelShaderInput input) : SV_TARGET
 {  
+    float3 toEye = normalize(eyeWorld - input.posWorld);
     float4 worldPos = float4(input.posWorld, 1.0f);
+    
     worldPos = mul(worldPos, sunViewMatrix).xyzw;
-    worldPos = worldPos / radius;
-    //z축 값이 0..?
-    input.texcoord.x = (worldPos.x + 1.0) / 2.;
-    input.texcoord.y = (2 - (worldPos.y + 1.0)) / 2.;
+    float curRadius = length(worldPos);
+    worldPos = worldPos / sphereRadius;
+    //z축 값이 0..?, y축이 더 길음, 
+    input.texcoord.x = ((worldPos.x + 1.0) / 2.)*0.4 + 0.3;//0.3~0.7
+    input.texcoord.y = ((2 - (worldPos.y + 1.0)) / 2.)*0.5 + 0.25;
     
     
     freqs[0] = g_texture0.Sample(g_sampler, float2(0.01, 0.25)).x;
@@ -146,6 +151,17 @@ float4 main(PixelShaderInput input) : SV_TARGET
 	//fragColor.rgb	= float3( r );
     float3 temp = f * (0.75 + brightness * 0.3) * orange;
     float3 temp3 = temp + starSphere + corona * orange + starGlow * orangeRed;
+    
+    float4 specular =
+        g_specularCube.Sample(g_sampler, -toEye);
+    float texcoordLength = length(float2((input.texcoord.x - 0.5) / 0.2, (input.texcoord.y - 0.5)) / 0.25);
+    if (texcoordLength > 1.41 * 0.8 && temp3.r < 0.75)//최대 1.41, 90프로
+    {//x축 기준으로 0.3~0.7, y축 기준으로0.25~0.75범위 갖고잇음
+        temp3.r = specular.r;
+        temp3.g = specular.g;
+        temp3.b = specular.b;
+
+    }
     return float4(temp3, 1.0);
 
 }

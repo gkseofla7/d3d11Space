@@ -18,6 +18,7 @@ bool ExampleApp::Initialize() {
     if (!AppBase::Initialize())
         return false;
 
+
     m_cubeMapping.Initialize(m_device,
                              L"./CubemapTextures/Ice.dds",
                              L"./CubemapTextures/Ice.dds");
@@ -36,6 +37,8 @@ bool ExampleApp::Initialize() {
     sun.textureFilename = "shadertoytexture0.jpg";
      m_meshSun.Initialize(m_device, {sun}); // "StarPixelShader.hlsl"
     m_meshSun.m_radius = 0.3f;
+     m_meshSun.m_diffuseResView = m_cubeMapping.m_diffuseResView;
+    m_meshSun.m_specularResView = m_cubeMapping.m_specularResView;
     BuildFilters();
 
     return true;
@@ -44,7 +47,7 @@ bool ExampleApp::Initialize() {
 void ExampleApp::Update(float dt) {
 
     using namespace DirectX;
-
+    static float time = 0.0f;
     auto &visibleMeshGroup =
         m_visibleMeshIndex == 0 ? m_meshGroupSphere : m_meshGroupCharacter;
 
@@ -53,7 +56,8 @@ void ExampleApp::Update(float dt) {
                     Matrix::CreateRotationX(m_modelRotation.x) *
                     Matrix::CreateRotationZ(m_modelRotation.z) *
                     Matrix::CreateTranslation(m_modelTranslation);
-    
+    modelRow = modelRow*Matrix::CreateRotationY(m_worldRotation.y * time) *
+               Matrix::CreateRotationZ(m_worldRotation.z * time) ;
     auto invTransposeRow = modelRow;
     invTransposeRow.Translation(Vector3(0.0f));
     invTransposeRow = invTransposeRow.Invert().Transpose();
@@ -69,20 +73,23 @@ void ExampleApp::Update(float dt) {
                                        aspect, m_nearZ, m_farZ)
             : XMMatrixOrthographicOffCenterLH(-aspect, aspect, -1.0f, 1.0f,
                                               m_nearZ, m_farZ);
+    //Sun 관련 Update
     m_meshSun.m_basicVertexConstantData.model = modelRow.Transpose();
     m_meshSun.m_basicVertexConstantData.view = viewRow.Transpose();
     m_meshSun.m_basicVertexConstantData.projection = projRow.Transpose();
-    auto eyeWorld = Vector3::Transform(Vector3(0.0f), viewRow.Invert());
 
+    auto eyeWorld = Vector3::Transform(Vector3(0.0f), viewRow.Invert());
     Vector3 centerWorldPos = Vector3::Transform(m_meshSun.m_center, modelRow);
     Matrix projSun = Matrix::CreateLookAt(centerWorldPos, eyeWorld, Vector3(0.f, 1.f, 0.f));
     m_meshSun.m_basicPixelConstantData.sunViewMatrix = projSun.Transpose();
-    m_meshSun.m_basicPixelConstantData.radius = m_meshSun.m_radius;
+    m_meshSun.m_basicPixelConstantData.sphereRadius = m_meshSun.m_radius;
+    m_meshSun.m_basicPixelConstantData.iTime = time;
+    m_meshSun.m_basicPixelConstantData.eyeWorld = eyeWorld;
+    m_meshSun.UpdateConstantBuffers(m_device, m_context);
+
+    //여긴 일단 무시
     {
-        
-
         // MeshGroup의 ConstantBuffers 업데이트
-
         for (int i = 0; i < MAX_LIGHTS; i++) {
             // 다른 조명 끄기
             if (i != m_lightType) {
@@ -94,9 +101,7 @@ void ExampleApp::Update(float dt) {
             }
         }
         {
-
             visibleMeshGroup.m_basicPixelConstantData.eyeWorld = eyeWorld;
-
             visibleMeshGroup.m_basicPixelConstantData.material.diffuse =
                 Vector3(m_materialDiffuse);
             visibleMeshGroup.m_basicPixelConstantData.material.specular =
@@ -130,6 +135,7 @@ void ExampleApp::Update(float dt) {
 
     //    m_dirtyflag = 0;
     //}
+    time += dt;
 }
 
 void ExampleApp::Render() {
@@ -158,7 +164,7 @@ void ExampleApp::Render() {
     }
     // 큐브매핑
     m_cubeMapping.Render(m_context);
-
+    m_meshSun.Render(m_context);
     // 물체들
     //if (m_visibleMeshIndex == 0) {
     //    m_meshGroupSphere.Render(m_context);

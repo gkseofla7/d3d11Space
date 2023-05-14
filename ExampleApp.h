@@ -35,9 +35,10 @@ class ExampleApp : public AppBase {
     CubeMapping m_cubeMapping;
 
     bool m_usePerspectiveProjection = true;
-    Vector3 m_modelTranslation = Vector3(0.0f);
+    Vector3 m_modelTranslation = Vector3(0.0f, 2.f, 7.f);
     Vector3 m_modelRotation = Vector3(0.0f, 0.0f, 0.0f);
     Vector3 m_modelScaling = Vector3(1.8f);
+    Vector3 m_worldRotation = Vector3(0.f, 0.8f, 0.2f);
     Vector3 m_viewRot = Vector3(-0.1f, 0.0f, 0.0f);
 
     float m_projFovAngleY = 70.0f;

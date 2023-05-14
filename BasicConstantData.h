@@ -37,12 +37,13 @@ struct NormalVertexConstantData {
 
 struct SunPixelConstantData {
     Matrix sunViewMatrix;
-    float radius;
+    Vector3 eyeWorld;
+    float sphereRadius;
     float dx;
     float dy;
     float threshold;
     float strength;
     float iTime;
-    float dummy[2];
+    float dummy[3];
 };
 } // namespace hlab
