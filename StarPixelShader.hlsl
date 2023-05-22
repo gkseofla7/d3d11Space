@@ -1,6 +1,7 @@
 #include "Common.hlsli" // 쉐이더에서도 include 사용 가능
 Texture2D g_texture0 : register(t0);
 TextureCube g_specularCube : register(t1);
+Texture2D g_renderTargetTexture : register(t2);
 SamplerState g_sampler : register(s0);
 
 
@@ -73,6 +74,28 @@ float4 main(PixelShaderInput input) : SV_TARGET
 {  
     float3 toEye = normalize(eyeWorld - input.posWorld);
     float4 worldPos = float4(input.posWorld, 1.0f);
+    int height = 0;
+    for (int j = 0; j < 960; j++)
+    {
+        float fj = float(j);
+        float4 color = g_renderTargetTexture.Sample(g_sampler, float2(input.posProj.x, fj));
+        float tmp = color.x + color.y + color.z;
+        tmp = tmp / 3.;
+        if (tmp <= 0.3&&height==0)
+        {
+            height = j;
+            //break;
+        }
+        
+    }
+    float4 specular =
+        g_specularCube.Sample(g_sampler, -toEye);
+    
+    if (height >= (int) input.posProj.y)
+    {
+        return specular;
+    }
+
     
     worldPos = mul(worldPos, sunViewMatrix).xyzw;
     float curRadius = length(worldPos);
@@ -152,8 +175,6 @@ float4 main(PixelShaderInput input) : SV_TARGET
     float3 temp = f * (0.75 + brightness * 0.3) * orange;
     float3 temp3 = temp + starSphere + corona * orange + starGlow * orangeRed;
     
-    float4 specular =
-        g_specularCube.Sample(g_sampler, -toEye);
     float texcoordLength = length(float2((input.texcoord.x - 0.5) / 0.2, (input.texcoord.y - 0.5)) / 0.25);
     if (texcoordLength > 1.41 * 0.8 && temp3.r < 0.75)//최대 1.41, 90프로
     {//x축 기준으로 0.3~0.7, y축 기준으로0.25~0.75범위 갖고잇음

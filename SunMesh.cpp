@@ -90,9 +90,10 @@ void SunMesh::Render(ComPtr<ID3D11DeviceContext> &context) {
             0, 1, mesh->vertexConstantBuffer.GetAddressOf());
 
         // 물체 렌더링할 때 큐브맵도 같이 사용
-        ID3D11ShaderResourceView *resViews[2] = {
-            mesh->textureResourceView.Get(), m_specularResView.Get()};
-        context->PSSetShaderResources(0, 2, resViews);
+        ID3D11ShaderResourceView *resViews[3] = {
+            mesh->textureResourceView.Get(), m_specularResView.Get(),
+            m_renderTargetView.Get()};
+        context->PSSetShaderResources(0, 3, resViews);
 
         context->PSSetConstantBuffers(0, 1,
                                       mesh->pixelConstantBuffer.GetAddressOf());

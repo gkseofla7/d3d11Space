@@ -22,6 +22,7 @@ class SunMesh {
     // ExampleApp:Initialize()에서 접근
     ComPtr<ID3D11ShaderResourceView> m_diffuseResView;
     ComPtr<ID3D11ShaderResourceView> m_specularResView;
+    ComPtr<ID3D11ShaderResourceView> m_renderTargetView;
   private:
     // 메쉬 그리기
     std::vector<shared_ptr<Mesh>> m_meshes;

@@ -56,15 +56,17 @@ void ExampleApp::Update(float dt) {
                     Matrix::CreateRotationX(m_modelRotation.x) *
                     Matrix::CreateRotationZ(m_modelRotation.z) *
                     Matrix::CreateTranslation(m_modelTranslation);
-    modelRow = modelRow*Matrix::CreateRotationY(m_worldRotation.y * time) *
-               Matrix::CreateRotationZ(m_worldRotation.z * time) ;
+    auto sunAxis = m_modelTranslation.Cross(Vector3(1.0f, 0.f, 0.f));
+    sunAxis.Normalize();
+    modelRow = modelRow * Matrix::CreateFromAxisAngle(sunAxis, time);
+
     auto invTransposeRow = modelRow;
     invTransposeRow.Translation(Vector3(0.0f));
     invTransposeRow = invTransposeRow.Invert().Transpose();
 
     auto viewRow = Matrix::CreateRotationY(m_viewRot.y) *
                    Matrix::CreateRotationX(m_viewRot.x) *
-                   Matrix::CreateTranslation(0.0f, 0.0f, 2.0f);
+                   Matrix::CreateTranslation(0.0f, 0.0f, 5.0f);
 
     const float aspect = AppBase::GetAspectRatio();
     Matrix projRow =
@@ -164,6 +166,7 @@ void ExampleApp::Render() {
     }
     // 큐브매핑
     m_cubeMapping.Render(m_context);
+    m_meshSun.m_renderTargetView = m_shaderResourceView;
     m_meshSun.Render(m_context);
     // 물체들
     //if (m_visibleMeshIndex == 0) {
@@ -185,8 +188,44 @@ void ExampleApp::Render() {
 }
 
 void ExampleApp::BuildFilters() {
+    return;
+     m_filters.clear();
 
-    m_filters.clear();
+    auto copyFilter =
+        make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Sampling",
+                                 m_screenWidth, m_screenHeight);
+
+    copyFilter->SetShaderResources({this->m_shaderResourceView});
+    m_filters.push_back(copyFilter);
+
+    auto downFilter = make_shared<ImageFilter>(m_device, m_context, L"Sampling",
+                                               L"Bloom", m_screenWidth / m_down,
+                                               m_screenHeight / m_down);
+    downFilter->SetShaderResources({m_shaderResourceView});
+    downFilter->m_pixelConstData.threshold = m_threshold;
+    downFilter->UpdateConstantBuffers(m_device, m_context);
+    m_filters.push_back(downFilter);
+    for (int i = 0; i < 10; i++) {
+        auto &prevResource = m_filters.back()->m_shaderResourceView;
+        m_filters.push_back(make_shared<ImageFilter>(
+            m_device, m_context, L"Sampling", L"BlurX", m_screenWidth / m_down,
+            m_screenHeight / m_down));
+        m_filters.back()->SetShaderResources({prevResource});
+
+        auto &prevResource2 = m_filters.back()->m_shaderResourceView;
+        m_filters.push_back(
+            make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"BlurY",
+                                     m_screenWidth, m_screenHeight));
+        m_filters.back()->SetShaderResources({prevResource2});
+    }
+    auto finalFilter =
+        make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Combine",
+                                 m_screenWidth, m_screenHeight);
+    finalFilter->SetShaderResources(
+        {this->m_shaderResourceView,
+         m_filters.back()->m_shaderResourceView}); //
+    finalFilter->SetRenderTargets({this->m_renderTargetView});
+    m_filters.push_back(finalFilter);
 
 }
 
