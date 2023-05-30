@@ -62,6 +62,7 @@ void SunMesh::Initialize(ComPtr<ID3D11Device> &device,
 
     D3D11Utils::CreatePixelShader(device, L"StarPixelShader.hlsl",
                                   m_basicPixelShader);
+
 }
 
 

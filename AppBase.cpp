@@ -488,8 +488,8 @@ bool AppBase::CreateRenderTargetView() {
         m_device->CreateRenderTargetView(backBuffer.Get(), nullptr,
                                          m_renderTargetView.GetAddressOf());
 
-        // m_device->CreateShaderResourceView(backBuffer.Get(), nullptr,
-        // m_shaderResourceView.GetAddressOf());
+         m_device->CreateShaderResourceView(backBuffer.Get(), nullptr,
+         m_shaderResourceView.GetAddressOf());
 
         D3D11_TEXTURE2D_DESC desc;
         backBuffer->GetDesc(&desc);

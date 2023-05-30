@@ -39,6 +39,7 @@ bool ExampleApp::Initialize() {
     m_meshSun.m_radius = 0.3f;
      m_meshSun.m_diffuseResView = m_cubeMapping.m_diffuseResView;
     m_meshSun.m_specularResView = m_cubeMapping.m_specularResView;
+     m_meshSun.m_renderTargetView = m_shaderResourceView;
     BuildFilters();
 
     return true;
@@ -166,8 +167,7 @@ void ExampleApp::Render() {
     }
     // 큐브매핑
     m_cubeMapping.Render(m_context);
-    m_meshSun.m_renderTargetView = m_shaderResourceView;
-    m_meshSun.Render(m_context);
+
     // 물체들
     //if (m_visibleMeshIndex == 0) {
     //    m_meshGroupSphere.Render(m_context);
@@ -181,6 +181,9 @@ void ExampleApp::Render() {
     m_swapChain->GetBuffer(0, IID_PPV_ARGS(backBuffer.GetAddressOf()));
     m_context->ResolveSubresource(m_tempTexture.Get(), 0, backBuffer.Get(), 0,
                                   DXGI_FORMAT_R8G8B8A8_UNORM);
+
+    
+    m_meshSun.Render(m_context);
     // 후처리 필터
     for (auto &f : m_filters) {
         f->Render(m_context);

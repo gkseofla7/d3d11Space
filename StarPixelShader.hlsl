@@ -78,7 +78,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
     for (int j = 0; j < 960; j++)
     {
         float fj = float(j);
-        float4 color = g_renderTargetTexture.Sample(g_sampler, float2(input.posProj.x, fj));
+        float4 color = g_renderTargetTexture.Sample(g_sampler, float2(input.posProj.x/1280., fj/960.));
         float tmp = color.x + color.y + color.z;
         tmp = tmp / 3.;
         if (tmp <= 0.3&&height==0)
@@ -91,7 +91,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
     float4 specular =
         g_specularCube.Sample(g_sampler, -toEye);
     
-    if (height >= (int) input.posProj.y)
+    if (height <= (int) input.posProj.y)
     {
         return specular;
     }
